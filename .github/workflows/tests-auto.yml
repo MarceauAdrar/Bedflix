@@ -1,0 +1,58 @@
+name: CI - Tests Automatisés
+
+on:
+  push:
+    branches:
+      - marceau07/issue3
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: bedflix_sf_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Installation de Playwright
+        run: npm install --save-dev @playwright/test
+
+      - name: Installation des dépendances
+        run: |
+          if [ -f package.json ]; then npm install; fi
+          if [ -f composer.json ]; then composer install; fi
+
+      - name: Configuration de la base de données (Symfony/Laravel)
+        run: |
+          php bin/console doctrine:migrations:migrate --no-interaction || true
+          php artisan migrate --force || true
+
+      - name: Lancer les tests PHPUnit (Symfony/Laravel)
+        run: |
+          if [ -f phpunit.xml ]; then ./vendor/bin/phpunit; fi
+
+      - name: Lancer les tests Jest (React/Node)
+        run: |
+          if [ -f package.json ]; then npm test; fi
+
+      - name: Lancer les tests end-to-end avec Playwright
+        run: npx playwright test
+
+      - name: Génération du rapport de tests Playwright
+        run: npx playwright show-report
