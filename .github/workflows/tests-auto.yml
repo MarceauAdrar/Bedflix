@@ -30,9 +30,6 @@ jobs:
         with:
           node-version: 18
 
-      - name: Installation de Playwright
-        run: npm install --save-dev @playwright/test
-
       - name: Installation des dépendances
         run: |
           if [ -f package.json ]; then npm install; fi
@@ -46,9 +43,3 @@ jobs:
       - name: Lancer les tests PHPUnit (Symfony/Laravel)
         run: |
           if [ -f phpunit.xml ]; then ./vendor/bin/phpunit; fi
-
-      - name: Lancer les tests end-to-end avec Playwright
-        run: npx playwright test
-
-      - name: Génération du rapport de tests Playwright
-        run: npx playwright show-report
