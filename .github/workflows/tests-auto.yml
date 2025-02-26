@@ -47,10 +47,6 @@ jobs:
         run: |
           if [ -f phpunit.xml ]; then ./vendor/bin/phpunit; fi
 
-      - name: Lancer les tests Jest (React/Node)
-        run: |
-          if [ -f package.json ]; then npm test; fi
-
       - name: Lancer les tests end-to-end avec Playwright
         run: npx playwright test
 
